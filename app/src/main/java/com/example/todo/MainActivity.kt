@@ -16,11 +16,9 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // Инициализация ViewBinding
         binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root) // Устанавливаем только binding.root
+        setContentView(binding.root)
 
-        // Настройка edge-to-edge
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
@@ -28,11 +26,9 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        // Настройка адаптера
         adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, taskList)
         binding.listView.adapter = adapter
 
-        // Добавление задачи
         binding.addButton.setOnClickListener {
             val task = binding.editText.text.toString()
             if (task.isNotBlank()) {
@@ -42,7 +38,6 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        // Удаление задачи
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             taskList.removeAt(position)
             adapter.notifyDataSetChanged()
