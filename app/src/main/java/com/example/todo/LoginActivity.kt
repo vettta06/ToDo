@@ -13,11 +13,14 @@ import com.example.todo.databinding.ActivityLoginBinding
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
 import com.google.firebase.auth.ktx.auth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
 
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
     private val auth = Firebase.auth
+    private val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,25 +44,33 @@ class LoginActivity : AppCompatActivity() {
         binding.registerButton.setOnClickListener {
             val email = binding.emailEditText.text.toString()
             val password = binding.passwordEditText.text.toString()
+            if (password.length < 6) {
+                Toast.makeText(this, "Пароль должен быть не менее 6 символов", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             createUserWithEmail(email, password)
         }
     }
+
 
     private fun signInWithEmail(email: String, password: String) {
         auth.signInWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Log.d("Auth", "Вход выполнен!")
-                    val intent = Intent(this, MainActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    Log.e("Auth", "Ошибка входа: ${task.exception?.message}")
-                    Toast.makeText(
-                        this,
-                        "Ошибка входа: ${task.exception?.message}",
-                        Toast.LENGTH_LONG
-                    ).show()
+                    val userId = auth.currentUser?.uid
+                    db.collection("users")
+                        .document(userId!!)
+                        .get()
+                        .addOnSuccessListener { document ->
+                            if (document.exists()) {
+                                val userData = document.data
+                                val intent = Intent(this, MainActivity::class.java).apply {
+                                    putExtra("user_email", userData?.get("email") as? String)
+                                }
+                                startActivity(intent)
+                                finish()
+                            }
+                        }
                 }
             }
     }
@@ -68,9 +79,24 @@ class LoginActivity : AppCompatActivity() {
         auth.createUserWithEmailAndPassword(email, password)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Log.d("Auth", "Пользователь создан!")
+                    val userId = auth.currentUser?.uid
+                    val user = hashMapOf(
+                        "email" to email,
+                        "createdAt" to FieldValue.serverTimestamp(),
+                        "tasks" to emptyList<String>()
+                    )
+                    db.collection("users")
+                        .document(userId!!)
+                        .set(user)
+                        .addOnSuccessListener {
+                            Log.d("Auth", "Данные пользователя сохранены")
+                            signInWithEmail(email, password)
+                        }
+                        .addOnFailureListener { e ->
+                            Log.e("Auth", "Ошибка сохранения данных", e)
+                        }
                 } else {
-                    Log.e("Auth", "Ошибка регистрации: ${task.exception?.message}")
+                    Toast.makeText(this, "Ошибка: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }

@@ -1,23 +1,51 @@
 package com.example.todo
 
+import android.content.Intent
 import android.os.Bundle
 import android.widget.ArrayAdapter
+import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.example.todo.databinding.ActivityMainBinding
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
+import com.google.firebase.firestore.firestore
+import kotlin.jvm.java
+import com.example.todo.LoginActivity
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private val taskList = mutableListOf<String>()
     private lateinit var adapter: ArrayAdapter<String>
+    private val auth = Firebase.auth
+    private val db = Firebase.firestore
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        val currentUser = auth.currentUser
+        if (currentUser == null){
+            startActivity(Intent(this, LoginActivity::class.java))
+            Toast.makeText(this, "Пользователь не зарегистрирован", Toast.LENGTH_SHORT).show()
+            finish()
+            return
+        }
+
+        val userId = auth.currentUser?.uid
+        userId?.let {
+            db.collection("users")
+                .document(it)
+                .get()
+                .addOnSuccessListener { document ->
+                    val email = document.getString("email")
+                    Toast.makeText(this, "Добро пожаловать, $email", Toast.LENGTH_SHORT).show()
+                }
+        }
 
         enableEdgeToEdge()
         ViewCompat.setOnApplyWindowInsetsListener(binding.root) { v, insets ->
@@ -35,12 +63,16 @@ class MainActivity : AppCompatActivity() {
                 taskList.add(task)
                 adapter.notifyDataSetChanged()
                 binding.editText.text.clear()
+
+                //обновление пользователя
             }
+
         }
 
         binding.listView.setOnItemClickListener { _, _, position, _ ->
             taskList.removeAt(position)
             adapter.notifyDataSetChanged()
         }
+
     }
 }
