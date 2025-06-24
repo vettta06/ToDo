@@ -14,6 +14,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlin.jvm.java
 import com.example.todo.LoginActivity
+import com.google.firebase.firestore.FieldValue
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
@@ -44,6 +45,10 @@ class MainActivity : AppCompatActivity() {
                 .addOnSuccessListener { document ->
                     val email = document.getString("email")
                     Toast.makeText(this, "Добро пожаловать, $email", Toast.LENGTH_SHORT).show()
+                    //список задач
+                    val tasks = document.get("tasks") as? List<String> ?: emptyList()
+                    taskList.addAll(tasks)
+                    adapter.notifyDataSetChanged()
                 }
         }
 
@@ -65,13 +70,33 @@ class MainActivity : AppCompatActivity() {
                 binding.editText.text.clear()
 
                 //обновление пользователя
+                val userId = auth.currentUser?.uid
+                userId?.let{uid ->
+                    db.collection("users").document(uid)
+                        .update("tasks", FieldValue.arrayUnion(task))
+                        .addOnFailureListener { e ->
+                            Toast.makeText(this, "Ошибка сохранения: ${e.message}", Toast.LENGTH_SHORT).show()
+                        }
+                }
             }
 
         }
 
         binding.listView.setOnItemClickListener { _, _, position, _ ->
+            val taskToRemove = taskList[position]
             taskList.removeAt(position)
             adapter.notifyDataSetChanged()
+
+            val userId = auth.currentUser?.uid
+            userId?.let { uid ->
+                db.collection("users").document(uid)
+                    .update("tasks", FieldValue.arrayRemove(taskToRemove))
+                    .addOnFailureListener { e ->
+                        Toast.makeText(this, "Ошибка удаления: ${e.message}", Toast.LENGTH_SHORT).show()
+                        taskList.add(position, taskToRemove)
+                        adapter.notifyDataSetChanged()
+                    }
+            }
         }
 
     }
