@@ -14,6 +14,7 @@ import com.google.firebase.auth.auth
 import com.google.firebase.firestore.firestore
 import kotlin.jvm.java
 import com.example.todo.LoginActivity
+import com.example.todo.adapters.TaskAdapter
 import com.google.firebase.firestore.FieldValue
 
 class MainActivity : AppCompatActivity() {
@@ -59,7 +60,7 @@ class MainActivity : AppCompatActivity() {
             insets
         }
 
-        adapter = ArrayAdapter(this, android.R.layout.simple_list_item_1, taskList)
+        adapter = TaskAdapter(this, taskList)
         binding.listView.adapter = adapter
 
         binding.addButton.setOnClickListener {
@@ -82,7 +83,7 @@ class MainActivity : AppCompatActivity() {
 
         }
 
-        binding.listView.setOnItemClickListener { _, _, position, _ ->
+        /*binding.listView.setOnItemClickListener { _, _, position, _ ->
             val taskToRemove = taskList[position]
             taskList.removeAt(position)
             adapter.notifyDataSetChanged()
@@ -98,6 +99,6 @@ class MainActivity : AppCompatActivity() {
                     }
             }
         }
-
+        */
     }
 }
