@@ -160,6 +160,7 @@ class MainActivity : AppCompatActivity() {
             .addOnSuccessListener {
                 Log.d("AddTask", "Задача успешно добавлена. userId: ${task.userId}")
                 Toast.makeText(this, "Задача добавлена", Toast.LENGTH_SHORT).show()
+                loadTasks()
             }
             .addOnFailureListener { e ->
                 Log.e("AddTaskError", "Ошибка добавления задачи", e)
@@ -206,6 +207,7 @@ class MainActivity : AppCompatActivity() {
         db.collection("tasks").document(task.id)
             .set(task)
             .addOnSuccessListener {
+                loadTasks()
                 Toast.makeText(this, "Задача обновлена", Toast.LENGTH_SHORT).show()
             }
     }
