@@ -10,9 +10,7 @@ import com.google.firebase.Firebase
 import android.util.Log
 import android.widget.Toast
 import com.example.todo.databinding.ActivityLoginBinding
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import com.google.firebase.auth.ktx.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
 
@@ -82,21 +80,15 @@ class LoginActivity : AppCompatActivity() {
                     val userId = auth.currentUser?.uid
                     val user = hashMapOf(
                         "email" to email,
-                        "createdAt" to FieldValue.serverTimestamp(),
-                        "tasks" to emptyList<String>()
+                        "createdAt" to FieldValue.serverTimestamp()
                     )
+
                     db.collection("users")
                         .document(userId!!)
                         .set(user)
                         .addOnSuccessListener {
-                            Log.d("Auth", "Данные пользователя сохранены")
                             signInWithEmail(email, password)
                         }
-                        .addOnFailureListener { e ->
-                            Log.e("Auth", "Ошибка сохранения данных", e)
-                        }
-                } else {
-                    Toast.makeText(this, "Ошибка: ${task.exception?.message}", Toast.LENGTH_LONG).show()
                 }
             }
     }
