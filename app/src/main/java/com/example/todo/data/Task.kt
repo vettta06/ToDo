@@ -8,7 +8,8 @@ data class Task(
     val id: String? = null,
     val title: String,
     val deadline: Date,
-    val userId: String
+    val userId: String,
+    val completed: Boolean = false
 ) {
     constructor() : this(null, "", Date(), "")
 }

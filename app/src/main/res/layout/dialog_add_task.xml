@@ -3,19 +3,23 @@
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp"
+    android:background="@color/background">
 
     <EditText
         android:id="@+id/taskEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Название задачи"/>
+        android:backgroundTint="@color/divider"
+        android:foregroundTint="#9C27B0"
+        android:hint="Название задачи"
+        android:textColorHint="@color/textColor" />
 
     <DatePicker
         android:id="@+id/datePicker"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:calendarViewShown="false"
-        android:datePickerMode="spinner"/>
-
+        android:layout_marginTop="16dp"
+        android:datePickerMode="spinner"
+        android:calendarViewShown="false"/>
 </LinearLayout>

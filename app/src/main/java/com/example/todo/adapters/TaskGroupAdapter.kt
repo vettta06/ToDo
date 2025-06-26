@@ -89,8 +89,9 @@ class TaskGroupAdapter(
         fun bind(task: Task) {
             binding.taskText.text = task.title
 
+            // Избегаем множественных вызовов слушателя
             binding.checkBox.setOnCheckedChangeListener(null)
-            binding.checkBox.isChecked = false
+            binding.checkBox.isChecked = task.completed
             binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     onTaskDelete(task)

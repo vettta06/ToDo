@@ -42,7 +42,7 @@ class MainActivity : AppCompatActivity() {
         adapter = TaskGroupAdapter(
             taskMap,
             onTaskClick = { task -> showEditTaskDialog(task) },
-            onTaskDelete = { task -> deleteTask(task) } // Добавлен обработчик удаления
+            onTaskDelete = { task -> deleteTask(task) }
         )
         binding.recyclerView.layoutManager = LinearLayoutManager(this)
         binding.recyclerView.adapter = adapter
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         loadTasks()
-        migrateOldTasks() // Добавьте миграцию старых задач
+        migrateOldTasks()
     }
 
     private fun migrateOldTasks() {
@@ -219,6 +219,7 @@ class MainActivity : AppCompatActivity() {
             .delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "Задача удалена", Toast.LENGTH_SHORT).show()
+                loadTasks()
             }
     }
 }
