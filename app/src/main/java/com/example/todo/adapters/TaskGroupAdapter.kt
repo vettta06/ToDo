@@ -1,8 +1,10 @@
 package com.example.todo.adapters
 
+import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.CheckBox
 import androidx.recyclerview.widget.RecyclerView
 import com.example.todo.data.Task
 import com.example.todo.databinding.ItemHeaderBinding
@@ -91,15 +93,31 @@ class TaskGroupAdapter(
 
             binding.checkBox.setOnCheckedChangeListener(null)
             binding.checkBox.isChecked = false
+
             binding.checkBox.setOnCheckedChangeListener { _, isChecked ->
                 if (isChecked) {
                     onTaskDelete(task)
                 }
             }
 
-            binding.root.setOnClickListener {
+            binding.taskText.setOnClickListener {
                 onTaskClick(task)
             }
+
+            binding.root.setOnClickListener {
+                if (!isViewUnder(binding.checkBox, it.x.toInt(), it.y.toInt())) {
+                    onTaskClick(task)
+                }
+            }
+        }
+
+        private fun isViewUnder(view: View, x: Int, y: Int): Boolean {
+            val location = IntArray(2)
+            view.getLocationOnScreen(location)
+            val viewX = location[0]
+            val viewY = location[1]
+            return (x > viewX && x < (viewX + view.width) &&
+                    y > viewY && y < (viewY + view.height))
         }
     }
 }

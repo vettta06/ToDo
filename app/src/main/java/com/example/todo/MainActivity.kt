@@ -15,6 +15,7 @@ import kotlin.jvm.java
 import com.example.todo.adapters.TaskGroupAdapter
 import com.example.todo.data.Task
 import com.example.todo.databinding.DialogAddTaskBinding
+import com.google.firebase.firestore.DocumentChange
 import com.google.firebase.firestore.FieldValue
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -102,9 +103,17 @@ class MainActivity : AppCompatActivity() {
                     return@addSnapshotListener
                 }
 
-                Log.d("TasksLoaded", "Количество документов: ${snapshot?.size()}")
+                // Фильтруем удаленные документы
+                for (change in snapshot!!.documentChanges) {
+                    if (change.type == DocumentChange.Type.REMOVED) {
+                        val taskId = change.document.id
+                        // Обработка удаленных задач
+                    }
+                }
+
+                Log.d("TasksLoaded", "Количество документов: ${snapshot.size()}")
                 taskMap.clear()
-                snapshot?.documents?.forEach { doc ->
+                snapshot.documents.forEach { doc ->
                     val task = doc.toObject(Task::class.java)!!.copy(id = doc.id)
                     Log.d("TaskDetails", "Загружена задача: $task")
                     val dateKey = SimpleDateFormat("dd.MM.yyyy", Locale.getDefault()).format(task.deadline)
@@ -155,12 +164,14 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun addTask(task: Task) {
+        Log.d("AddTask", "Добавляем задачу: $task")
+
         db.collection("tasks")
             .add(task)
             .addOnSuccessListener {
                 Log.d("AddTask", "Задача успешно добавлена. userId: ${task.userId}")
-                Toast.makeText(this, "Задача добавлена", Toast.LENGTH_SHORT).show()
                 loadTasks()
+                Toast.makeText(this, "Задача добавлена", Toast.LENGTH_SHORT).show()
             }
             .addOnFailureListener { e ->
                 Log.e("AddTaskError", "Ошибка добавления задачи", e)
@@ -204,21 +215,34 @@ class MainActivity : AppCompatActivity() {
     private fun updateTask(task: Task) {
         if (task.id == null) return
 
+        val updates = hashMapOf<String, Any>(
+            "title" to task.title,
+            "deadline" to task.deadline
+        )
+
         db.collection("tasks").document(task.id)
-            .set(task)
+            .update(updates)
             .addOnSuccessListener {
-                loadTasks()
                 Toast.makeText(this, "Задача обновлена", Toast.LENGTH_SHORT).show()
+                // УБИРАЕМ вызов loadTasks()
+            }
+            .addOnFailureListener { e ->
+                Log.e("UpdateError", "Ошибка обновления задачи", e)
+                Toast.makeText(this, "Ошибка обновления: ${e.message}", Toast.LENGTH_LONG).show()
             }
     }
 
     private fun deleteTask(task: Task) {
         if (task.id == null) return
 
+        Toast.makeText(this, "Удаление задачи...", Toast.LENGTH_SHORT).show()
+
         db.collection("tasks").document(task.id)
             .delete()
             .addOnSuccessListener {
-                Toast.makeText(this, "Задача удалена", Toast.LENGTH_SHORT).show()
+            }
+            .addOnFailureListener { e ->
+                Toast.makeText(this, "Ошибка удаления: ${e.message}", Toast.LENGTH_SHORT).show()
             }
     }
 }
