@@ -219,7 +219,6 @@ class MainActivity : AppCompatActivity() {
             .delete()
             .addOnSuccessListener {
                 Toast.makeText(this, "Задача удалена", Toast.LENGTH_SHORT).show()
-                loadTasks()
             }
     }
 }
