@@ -63,7 +63,6 @@ class MainActivity : AppCompatActivity() {
                 val oldTasks = document.get("tasks") as? List<String> ?: emptyList()
 
                 if (oldTasks.isNotEmpty()) {
-                    // Добавить новые задачи с дедлайном "сегодня"
                     val batch = db.batch()
                     val now = Date()
 
@@ -77,7 +76,6 @@ class MainActivity : AppCompatActivity() {
                         batch.set(ref, task)
                     }
 
-                    // Удалить старые задачи
                     batch.update(
                         db.collection("users").document(userId),
                         "tasks", FieldValue.delete()
@@ -85,7 +83,7 @@ class MainActivity : AppCompatActivity() {
 
                     batch.commit().addOnSuccessListener {
                         Log.d("Migration", "Old tasks migrated successfully")
-                        loadTasks() // Перезагрузить задачи после миграции
+                        loadTasks()
                     }
                 }
             }
@@ -204,9 +202,6 @@ class MainActivity : AppCompatActivity() {
                 }.time
 
                 updateTask(task.copy(title = newTitle, deadline = newDate))
-            }
-            .setNegativeButton("Удалить") { _, _ ->
-                deleteTask(task)
             }
             .setNeutralButton("Отмена", null)
             .show()

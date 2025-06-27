@@ -7,13 +7,12 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import com.google.firebase.Firebase
-import android.util.Log
 import android.widget.Toast
 import com.example.todo.databinding.ActivityLoginBinding
 import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.firestore
-
+import com.google.firebase.auth.FirebaseAuthException
 
 class LoginActivity : AppCompatActivity() {
     private lateinit var binding: ActivityLoginBinding
@@ -70,6 +69,10 @@ class LoginActivity : AppCompatActivity() {
                             }
                         }
                 }
+            }
+            .addOnFailureListener { exception ->
+                Toast.makeText(this, "Неверная почта или пароль", Toast.LENGTH_SHORT).show()
+                println("Ошибка входа: ${exception.message}")
             }
     }
 

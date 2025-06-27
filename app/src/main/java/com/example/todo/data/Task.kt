@@ -1,7 +1,5 @@
 package com.example.todo.data
 
-import com.google.firebase.Timestamp
-import com.google.firebase.firestore.DocumentId
 import java.util.Date
 
 data class Task(
